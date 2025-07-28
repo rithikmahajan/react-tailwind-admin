@@ -15,14 +15,54 @@ const BlockUser = () => {
     }
   ]);
 
+  // Modal states
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
+  const [showBlockSuccess, setShowBlockSuccess] = useState(false);
+  const [showUnblockSuccess, setShowUnblockSuccess] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const handleBlockUser = (userId) => {
+    const user = users.find(u => u.id === userId);
+    setSelectedUser(user);
+    
+    if (user.isBlocked) {
+      setShowUnblockConfirm(true);
+    } else {
+      setShowBlockConfirm(true);
+    }
+  };
+
+  const confirmBlockUser = () => {
     setUsers(prev => 
       prev.map(user => 
-        user.id === userId 
-          ? { ...user, isBlocked: !user.isBlocked }
+        user.id === selectedUser.id 
+          ? { ...user, isBlocked: true }
           : user
       )
     );
+    setShowBlockConfirm(false);
+    setShowBlockSuccess(true);
+  };
+
+  const confirmUnblockUser = () => {
+    setUsers(prev => 
+      prev.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, isBlocked: false }
+          : user
+      )
+    );
+    setShowUnblockConfirm(false);
+    setShowUnblockSuccess(true);
+  };
+
+  const closeAllModals = () => {
+    setShowBlockConfirm(false);
+    setShowUnblockConfirm(false);
+    setShowBlockSuccess(false);
+    setShowUnblockSuccess(false);
+    setSelectedUser(null);
   };
 
   const handleSendMessage = () => {
@@ -146,6 +186,108 @@ const BlockUser = () => {
           </div>
         </div>
       </div>
+
+      {/* Block User Confirmation Modal */}
+      {showBlockConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                Are you sure you want to block this user
+              </h3>
+              <div className="flex space-x-4">
+                <button
+                  onClick={confirmBlockUser}
+                  className="flex-1 bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                >
+                  yes
+                </button>
+                <button
+                  onClick={closeAllModals}
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block User Success Modal */}
+      {showBlockSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                user blocked successfully
+              </h3>
+              <button
+                onClick={closeAllModals}
+                className="w-full bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unblock User Confirmation Modal */}
+      {showUnblockConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                Are you sure you want to unblock this user
+              </h3>
+              <div className="flex space-x-4">
+                <button
+                  onClick={confirmUnblockUser}
+                  className="flex-1 bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors"
+                >
+                  yes
+                </button>
+                <button
+                  onClick={closeAllModals}
+                  className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unblock User Success Modal */}
+      {showUnblockSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                user unblocked successfully
+              </h3>
+              <button
+                onClick={closeAllModals}
+                className="w-full bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
