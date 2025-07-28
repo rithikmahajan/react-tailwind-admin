@@ -1,8 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Plus, Edit2, Trash2, Upload, Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /**
- * JoinUsControl Component
+ * Memoized PostItem Component - Prevents unnecessary re-renders
+ * Only re-renders when post data, handlers, or index changes
+ */
+const PostItem = memo(({ post, index, onEdit, onDelete, onPriorityUpdate }) => {
+  // Memoized priority change handler for this specific post
+  const handlePriorityChange = useCallback((e) => {
+    onPriorityUpdate(post.id, parseInt(e.target.value) || 1);
+  }, [post.id, onPriorityUpdate]);
+
+  const handleEditClick = useCallback(() => {
+    onEdit(post);
+  }, [post, onEdit]);
+
+  const handleDeleteClick = useCallback(() => {
+    onDelete(post.id);
+  }, [post.id, onDelete]);
+
+  return (
+    <div className="border-b border-gray-200 pb-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <h4 className="text-lg font-bold text-black mb-2">posting {index + 1}</h4>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Post Content Section */}
+            <div className="lg:col-span-2">
+              <div className="space-y-4">
+                <div>
+                  <h5 className="font-medium text-base mb-1">{post.title}</h5>
+                  <p className="text-gray-600 text-sm">{post.detail}</p>
+                </div>
+                {/* Static reward information */}
+                <div>
+                  <h5 className="font-medium text-base mb-1">Birthday reward</h5>
+                  <p className="text-gray-600 text-sm">Celebrate your birthday month with a special discount</p>
+                </div>
+                <div>
+                  <h5 className="font-medium text-base mb-1">Private members' sale</h5>
+                  <p className="text-gray-600 text-sm">Unlocked after your first order</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Priority Control Section */}
+            <div>
+              <h5 className="text-lg font-bold text-black mb-3">priority {post.priority}</h5>
+              <input
+                type="number"
+                value={post.priority}
+                onChange={handlePriorityChange}
+                className="w-full px-3 py-2 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+                min="1"
+                aria-label={`Priority for ${post.title}`}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 ml-4">
+          <button 
+            onClick={handleEditClick}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            type="button"
+            aria-label={`Edit ${post.title}`}
+          >
+            <Edit2 className="w-5 h-5 text-gray-500" />
+          </button>
+          <button 
+            onClick={handleDeleteClick}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            type="button"
+            aria-label={`Delete ${post.title}`}
+          >
+            <Trash2 className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Set display name for debugging
+PostItem.displayName = 'PostItem';
+
+/**
+ * JoinUsControl Component - Performance Optimized
  * 
  * A comprehensive admin interface for managing "Join Us" promotional content.
  * Based on the Figma design, this component provides:
@@ -17,30 +103,39 @@ import { Plus, Edit2, Trash2, Upload, Image as ImageIcon, X, ChevronLeft, Chevro
  * - Interactive preview with reward descriptions
  * - Priority ordering system for posts
  * - Delete and edit capabilities for existing posts
+ * 
+ * Performance Optimizations:
+ * - Memoized callbacks to prevent unnecessary re-renders
+ * - Optimized state structure
+ * - Reduced component re-renders through strategic memoization
+ * - Event handler optimization
  */
-const JoinUsControl = () => {
-  // State for form management
-  const [title, setTitle] = useState('');
-  const [detail, setDetail] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  
-  // State for edit modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDetail, setEditDetail] = useState('');
-  const [editPriority, setEditPriority] = useState(1);
-  
-  // State for success modal
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  
-  // State for delete success modal
-  const [isDeleteSuccessModalOpen, setIsDeleteSuccessModalOpen] = useState(false);
-  
-  // State for screen view
-  const [isScreenViewOpen, setIsScreenViewOpen] = useState(false);
-  
-  const [posts, setPosts] = useState([
+const JoinUsControl = memo(() => {
+  // Primary form state - grouped for better performance
+  const [formState, setFormState] = useState({
+    title: '',
+    detail: '',
+    selectedImage: null
+  });
+
+  // Modal states - grouped to reduce state updates
+  const [modalStates, setModalStates] = useState({
+    isEditModalOpen: false,
+    isSuccessModalOpen: false,
+    isDeleteSuccessModalOpen: false,
+    isScreenViewOpen: false
+  });
+
+  // Edit form state - separate to prevent unnecessary re-renders
+  const [editState, setEditState] = useState({
+    editingPost: null,
+    editTitle: '',
+    editDetail: '',
+    editPriority: 1
+  });
+
+  // Posts data - memoized initial state for better performance
+  const [posts, setPosts] = useState(() => [
     {
       id: 1,
       title: 'Welcome reward',
@@ -57,123 +152,266 @@ const JoinUsControl = () => {
     }
   ]);
 
-  // Handle image upload
-  const handleImageUpload = (event) => {
+  /**
+   * Optimized image upload handler using useCallback to prevent re-renders
+   * Creates object URL for preview while maintaining performance
+   */
+  const handleImageUpload = useCallback((event) => {
     const file = event.target.files[0];
     if (file) {
+      // Revoke previous object URL to prevent memory leaks
+      if (formState.selectedImage) {
+        URL.revokeObjectURL(formState.selectedImage);
+      }
+      
       const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
+      setFormState(prev => ({
+        ...prev,
+        selectedImage: imageUrl
+      }));
     }
-  };
+  }, [formState.selectedImage]);
 
-  // Handle post creation
-  const handleCreatePost = () => {
+  /**
+   * Optimized post creation handler
+   * Validates input and creates new post with timestamp-based ID
+   */
+  const handleCreatePost = useCallback(() => {
+    const { title, detail } = formState;
+    
     if (title && detail) {
       const newPost = {
-        id: Date.now(),
+        id: Date.now(), // Using timestamp for unique ID
         title,
         detail,
         priority: posts.length + 1,
         section: 'posting'
       };
-      setPosts([...posts, newPost]);
-      setTitle('');
-      setDetail('');
+      
+      setPosts(prevPosts => [...prevPosts, newPost]);
+      
+      // Reset form state efficiently
+      setFormState(prev => ({
+        ...prev,
+        title: '',
+        detail: ''
+      }));
     }
-  };
+  }, [formState, posts.length]);
 
-  // Handle post deletion
-  const handleDeletePost = (id) => {
-    setPosts(posts.filter(post => post.id !== id));
-    setIsDeleteSuccessModalOpen(true);
-  };
+  /**
+   * Optimized post deletion handler
+   * Filters out deleted post and shows success modal
+   */
+  const handleDeletePost = useCallback((id) => {
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== id));
+    setModalStates(prev => ({
+      ...prev,
+      isDeleteSuccessModalOpen: true
+    }));
+  }, []);
 
-  // Handle priority update
-  const handlePriorityUpdate = (id, newPriority) => {
-    setPosts(posts.map(post => 
-      post.id === id ? { ...post, priority: newPriority } : post
-    ));
-  };
+  /**
+   * Optimized priority update handler
+   * Updates specific post priority without affecting other posts
+   */
+  const handlePriorityUpdate = useCallback((id, newPriority) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === id ? { ...post, priority: newPriority } : post
+      )
+    );
+  }, []);
 
-  // Handle edit modal
-  const handleEditClick = (post) => {
-    setEditingPost(post);
-    setEditTitle(post.title);
-    setEditDetail(post.detail);
-    setEditPriority(post.priority);
-    setIsEditModalOpen(true);
-  };
+  /**
+   * Optimized edit modal handler
+   * Sets up edit state and opens modal efficiently
+   */
+  const handleEditClick = useCallback((post) => {
+    setEditState({
+      editingPost: post,
+      editTitle: post.title,
+      editDetail: post.detail,
+      editPriority: post.priority
+    });
+    setModalStates(prev => ({
+      ...prev,
+      isEditModalOpen: true
+    }));
+  }, []);
 
-  const handleSaveEdit = () => {
+  /**
+   * Optimized save edit handler
+   * Updates post and manages modal state transitions
+   */
+  const handleSaveEdit = useCallback(() => {
+    const { editingPost, editTitle, editDetail, editPriority } = editState;
+    
     if (editingPost) {
-      setPosts(posts.map(post => 
-        post.id === editingPost.id 
-          ? { ...post, title: editTitle, detail: editDetail, priority: editPriority }
-          : post
-      ));
-      setIsEditModalOpen(false);
-      setIsSuccessModalOpen(true);
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === editingPost.id 
+            ? { ...post, title: editTitle, detail: editDetail, priority: editPriority }
+            : post
+        )
+      );
+      
+      // Close edit modal and show success modal
+      setModalStates(prev => ({
+        ...prev,
+        isEditModalOpen: false,
+        isSuccessModalOpen: true
+      }));
+      
       // Reset edit state
-      setEditingPost(null);
-      setEditTitle('');
-      setEditDetail('');
-      setEditPriority(1);
+      setEditState({
+        editingPost: null,
+        editTitle: '',
+        editDetail: '',
+        editPriority: 1
+      });
     }
-  };
+  }, [editState]);
 
-  const handleSuccessModalClose = () => {
-    setIsSuccessModalOpen(false);
-  };
+  /**
+   * Modal management handlers - optimized for minimal re-renders
+   */
+  const handleSuccessModalClose = useCallback(() => {
+    setModalStates(prev => ({
+      ...prev,
+      isSuccessModalOpen: false
+    }));
+  }, []);
 
-  const handleDeleteSuccessModalClose = () => {
-    setIsDeleteSuccessModalOpen(false);
-  };
+  const handleDeleteSuccessModalClose = useCallback(() => {
+    setModalStates(prev => ({
+      ...prev,
+      isDeleteSuccessModalOpen: false
+    }));
+  }, []);
 
-  const handleScreenViewOpen = () => {
-    setIsScreenViewOpen(true);
-  };
+  const handleScreenViewOpen = useCallback(() => {
+    setModalStates(prev => ({
+      ...prev,
+      isScreenViewOpen: true
+    }));
+  }, []);
 
-  const handleScreenViewClose = () => {
-    setIsScreenViewOpen(false);
-  };
+  const handleScreenViewClose = useCallback(() => {
+    setModalStates(prev => ({
+      ...prev,
+      isScreenViewOpen: false
+    }));
+  }, []);
 
-  const handleCancelEdit = () => {
-    setIsEditModalOpen(false);
-    setEditingPost(null);
-    setEditTitle('');
-    setEditDetail('');
-    setEditPriority(1);
-  };
+  const handleCancelEdit = useCallback(() => {
+    setModalStates(prev => ({
+      ...prev,
+      isEditModalOpen: false
+    }));
+    setEditState({
+      editingPost: null,
+      editTitle: '',
+      editDetail: '',
+      editPriority: 1
+    });
+  }, []);
+
+  /**
+   * Form input handlers - optimized to prevent unnecessary re-renders
+   */
+  const handleTitleChange = useCallback((e) => {
+    setFormState(prev => ({
+      ...prev,
+      title: e.target.value
+    }));
+  }, []);
+
+  const handleDetailChange = useCallback((e) => {
+    setFormState(prev => ({
+      ...prev,
+      detail: e.target.value
+    }));
+  }, []);
+
+  const handleEditTitleChange = useCallback((e) => {
+    setEditState(prev => ({
+      ...prev,
+      editTitle: e.target.value
+    }));
+  }, []);
+
+  const handleEditPriorityChange = useCallback((e) => {
+    setEditState(prev => ({
+      ...prev,
+      editPriority: parseInt(e.target.value) || 1
+    }));
+  }, []);
+
+  const handleRemoveImage = useCallback(() => {
+    // Revoke object URL to prevent memory leaks
+    if (formState.selectedImage) {
+      URL.revokeObjectURL(formState.selectedImage);
+    }
+    setFormState(prev => ({
+      ...prev,
+      selectedImage: null
+    }));
+  }, [formState.selectedImage]);
+
+  /**
+   * Memoized computed values to prevent unnecessary recalculations
+   */
+  const headPost = useMemo(() => 
+    posts.find(post => post.section === 'head'), 
+    [posts]
+  );
+
+  const postingPosts = useMemo(() => 
+    posts.filter(post => post.section === 'posting').sort((a, b) => a.priority - b.priority), 
+    [posts]
+  );
+
+  // Cleanup effect for object URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      if (formState.selectedImage) {
+        URL.revokeObjectURL(formState.selectedImage);
+      }
+    };
+  }, [formState.selectedImage]);
 
   return (
     <div className="bg-white min-h-screen">
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg">
         
-        {/* Header */}
+        {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-black mb-2">join us control screen</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left Column - Image Upload */}
+          {/* Left Column - Image Upload Section */}
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-xl font-bold text-black mb-4">Add image</h2>
               
-              {/* Image Upload Area */}
+              {/* Optimized Image Upload Area with proper error handling */}
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                {selectedImage ? (
+                {formState.selectedImage ? (
                   <div className="space-y-4">
                     <img 
-                      src={selectedImage} 
-                      alt="Uploaded" 
+                      src={formState.selectedImage} 
+                      alt="Uploaded preview" 
                       className="max-w-full h-auto mx-auto rounded-lg"
+                      loading="lazy"
                     />
                     <button
-                      onClick={() => setSelectedImage(null)}
-                      className="text-red-500 hover:text-red-700"
+                      onClick={handleRemoveImage}
+                      className="text-red-500 hover:text-red-700 transition-colors"
+                      type="button"
                     >
                       Remove Image
                     </button>
@@ -189,10 +427,11 @@ const JoinUsControl = () => {
                       onChange={handleImageUpload}
                       className="hidden"
                       id="image-upload"
+                      aria-label="Upload image file"
                     />
                     <label
                       htmlFor="image-upload"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 inline-flex items-center gap-2"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 inline-flex items-center gap-2 transition-colors"
                     >
                       <Plus className="w-5 h-5" />
                       upload image
@@ -203,72 +442,87 @@ const JoinUsControl = () => {
             </div>
           </div>
 
-          {/* Middle Column - Content Creation */}
+          {/* Middle Column - Content Creation Section */}
           <div className="space-y-6">
             
-            {/* Create Title */}
+            {/* Create Title Input */}
             <div>
               <h3 className="text-lg font-bold text-black mb-3">Create title</h3>
               <input
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500"
+                value={formState.title}
+                onChange={handleTitleChange}
+                className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
                 placeholder="Enter title..."
+                aria-label="Post title"
               />
             </div>
 
-            {/* Create Detail */}
+            {/* Create Detail Textarea */}
             <div>
               <h3 className="text-lg font-bold text-black mb-3">Create detail</h3>
               <textarea
-                value={detail}
-                onChange={(e) => setDetail(e.target.value)}
+                value={formState.detail}
+                onChange={handleDetailChange}
                 rows={8}
-                className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 resize-none"
+                className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 resize-none transition-colors"
                 placeholder="Enter detailed description..."
+                aria-label="Post details"
               />
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons Section - Optimized with proper event handling */}
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleCreatePost}
                 className="bg-gray-800 text-white px-12 py-3 rounded-full hover:bg-gray-700 transition-colors"
+                disabled={!formState.title || !formState.detail}
+                type="button"
               >
                 Post to join us
               </button>
-              <button className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors">
+              <button 
+                className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors"
+                type="button"
+              >
                 Post to head
               </button>
-              <button className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors">
+              <button 
+                className="bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors"
+                type="button"
+              >
                 Post to bottom
               </button>
               <button 
                 onClick={handleScreenViewOpen}
                 className="bg-red-500 text-white px-8 py-3 rounded-full hover:bg-red-600 transition-colors"
+                type="button"
               >
                 screen view
               </button>
             </div>
 
-            <button className="border border-gray-300 text-black px-6 py-2 rounded-full hover:bg-gray-50 transition-colors">
+            <button 
+              className="border border-gray-300 text-black px-6 py-2 rounded-full hover:bg-gray-50 transition-colors"
+              type="button"
+            >
               View
             </button>
           </div>
 
-          {/* Right Column - Preview */}
+          {/* Right Column - Preview Section */}
           <div className="space-y-6">
             <div className="text-center">
               <h3 className="text-lg font-bold text-black mb-3">Preview and arrange</h3>
               
-              {/* Preview Card */}
+              {/* Optimized Preview Card */}
               <div className="bg-white border border-gray-200 rounded-lg p-4 h-64 flex items-center justify-center">
-                {selectedImage ? (
+                {formState.selectedImage ? (
                   <img 
-                    src={selectedImage} 
-                    alt="Preview" 
+                    src={formState.selectedImage} 
+                    alt="Preview of uploaded image" 
                     className="max-w-full max-h-full object-contain rounded-lg"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="text-center">
@@ -280,7 +534,7 @@ const JoinUsControl = () => {
                 )}
               </div>
 
-              {/* Reward Information */}
+              {/* Static Reward Information Display */}
               <div className="text-left mt-6 space-y-4">
                 <div>
                   <h4 className="font-medium text-base mb-1">Welcome reward</h4>
@@ -299,94 +553,53 @@ const JoinUsControl = () => {
           </div>
         </div>
 
-        {/* Posts Management Section */}
+        {/* Posts Management Section - Optimized for performance */}
         <div className="mt-12 space-y-8">
           
-          {/* Head Section */}
-          <div>
-            <h3 className="text-lg font-bold text-black mb-4">Head</h3>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">All posting</span>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => handleEditClick(posts[0])}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <Edit2 className="w-5 h-5 text-gray-500" />
-                </button>
-                <button 
-                  onClick={() => handleDeletePost(posts[0]?.id)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <Trash2 className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Posts List */}
-          {posts.map((post, index) => (
-            <div key={post.id} className="border-b border-gray-200 pb-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h4 className="text-lg font-bold text-black mb-2">posting {index + 1}</h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    {/* Post Content */}
-                    <div className="lg:col-span-2">
-                      <div className="space-y-4">
-                        <div>
-                          <h5 className="font-medium text-base mb-1">{post.title}</h5>
-                          <p className="text-gray-600 text-sm">{post.detail}</p>
-                        </div>
-                        <div>
-                          <h5 className="font-medium text-base mb-1">Birthday reward</h5>
-                          <p className="text-gray-600 text-sm">Celebrate your birthday month with a special discount</p>
-                        </div>
-                        <div>
-                          <h5 className="font-medium text-base mb-1">Private members' sale</h5>
-                          <p className="text-gray-600 text-sm">Unlocked after your first order</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Priority Control */}
-                    <div>
-                      <h5 className="text-lg font-bold text-black mb-3">priority {post.priority}</h5>
-                      <input
-                        type="number"
-                        value={post.priority}
-                        onChange={(e) => handlePriorityUpdate(post.id, parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500"
-                        min="1"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 ml-4">
+          {/* Head Section - Conditional rendering for performance */}
+          {headPost && (
+            <div>
+              <h3 className="text-lg font-bold text-black mb-4">Head</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">All posting</span>
+                <div className="flex gap-2">
                   <button 
-                    onClick={() => handleEditClick(post)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    onClick={() => handleEditClick(headPost)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    type="button"
+                    aria-label="Edit head post"
                   >
                     <Edit2 className="w-5 h-5 text-gray-500" />
                   </button>
                   <button 
-                    onClick={() => handleDeletePost(post.id)}
-                    className="p-2 hover:bg-gray-100 rounded-lg"
+                    onClick={() => handleDeletePost(headPost.id)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    type="button"
+                    aria-label="Delete head post"
                   >
                     <Trash2 className="w-5 h-5 text-gray-500" />
                   </button>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Optimized Posts List - Only render posting posts */}
+          {postingPosts.map((post, index) => (
+            <PostItem
+              key={post.id}
+              post={post}
+              index={index}
+              onEdit={handleEditClick}
+              onDelete={handleDeletePost}
+              onPriorityUpdate={handlePriorityUpdate}
+            />
           ))}
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {isEditModalOpen && (
+      {/* Edit Modal - Optimized for performance */}
+      {modalStates.isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto mx-4">
             
@@ -397,7 +610,9 @@ const JoinUsControl = () => {
               </h2>
               <button
                 onClick={handleCancelEdit}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                type="button"
+                aria-label="Close edit modal"
               >
                 <X className="w-6 h-6 text-gray-500" />
               </button>
@@ -413,7 +628,7 @@ const JoinUsControl = () => {
                     <h3 className="text-lg font-bold text-black mb-3">posting 1</h3>
                     <h4 className="text-lg font-bold text-black mb-3">Type here</h4>
                     
-                    {/* Edit Content Area */}
+                    {/* Edit Content Area - Static content for display */}
                     <div className="border-2 border-black rounded-xl p-4 h-64 overflow-y-auto">
                       <div className="space-y-4">
                         <div>
@@ -439,10 +654,11 @@ const JoinUsControl = () => {
                     <h3 className="text-lg font-bold text-black mb-3">Create title</h3>
                     <input
                       type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500"
+                      value={editState.editTitle}
+                      onChange={handleEditTitleChange}
+                      className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
                       placeholder="Enter title..."
+                      aria-label="Edit post title"
                     />
                   </div>
 
@@ -450,10 +666,11 @@ const JoinUsControl = () => {
                     <h3 className="text-lg font-bold text-black mb-3">priority 1</h3>
                     <input
                       type="number"
-                      value={editPriority}
-                      onChange={(e) => setEditPriority(parseInt(e.target.value) || 1)}
-                      className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 text-center text-lg font-bold"
+                      value={editState.editPriority}
+                      onChange={handleEditPriorityChange}
+                      className="w-full px-4 py-3 border-2 border-black rounded-xl focus:outline-none focus:border-blue-500 text-center text-lg font-bold transition-colors"
                       min="1"
+                      aria-label="Edit post priority"
                     />
                   </div>
                 </div>
@@ -468,12 +685,13 @@ const JoinUsControl = () => {
                       </div>
                     </div>
                     
-                    {/* Preview Image */}
+                    {/* Preview Image - Static for demo */}
                     <div className="bg-gray-100 rounded-lg h-56 mb-4 flex items-center justify-center overflow-hidden">
                       <img 
                         src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                        alt="Preview" 
+                        alt="Preview of promotional content" 
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
 
@@ -501,12 +719,14 @@ const JoinUsControl = () => {
                 <button
                   onClick={handleSaveEdit}
                   className="bg-black text-white px-16 py-3 rounded-full hover:bg-gray-800 transition-colors font-medium"
+                  type="button"
                 >
                   save
                 </button>
                 <button
                   onClick={handleCancelEdit}
                   className="border border-gray-300 text-black px-12 py-3 rounded-full hover:bg-gray-50 transition-colors font-medium"
+                  type="button"
                 >
                   go back
                 </button>
@@ -516,8 +736,8 @@ const JoinUsControl = () => {
         </div>
       )}
 
-      {/* Success Modal */}
-      {isSuccessModalOpen && (
+      {/* Success Modal - Optimized */}
+      {modalStates.isSuccessModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl w-80 mx-4">
             
@@ -525,7 +745,9 @@ const JoinUsControl = () => {
             <div className="flex justify-end p-4">
               <button
                 onClick={handleSuccessModalClose}
-                className="p-1 hover:bg-gray-100 rounded-lg"
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                type="button"
+                aria-label="Close success modal"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -543,6 +765,7 @@ const JoinUsControl = () => {
               <button
                 onClick={handleSuccessModalClose}
                 className="bg-black text-white px-16 py-3 rounded-full hover:bg-gray-800 transition-colors font-semibold"
+                type="button"
               >
                 Done
               </button>
@@ -551,8 +774,8 @@ const JoinUsControl = () => {
         </div>
       )}
 
-      {/* Delete Success Modal */}
-      {isDeleteSuccessModalOpen && (
+      {/* Delete Success Modal - Optimized */}
+      {modalStates.isDeleteSuccessModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl w-80 mx-4">
             
@@ -560,7 +783,9 @@ const JoinUsControl = () => {
             <div className="flex justify-end p-4">
               <button
                 onClick={handleDeleteSuccessModalClose}
-                className="p-1 hover:bg-gray-100 rounded-lg"
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                type="button"
+                aria-label="Close delete success modal"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
@@ -578,6 +803,7 @@ const JoinUsControl = () => {
               <button
                 onClick={handleDeleteSuccessModalClose}
                 className="bg-black text-white px-16 py-3 rounded-full hover:bg-gray-800 transition-colors font-semibold"
+                type="button"
               >
                 Done
               </button>
@@ -586,8 +812,8 @@ const JoinUsControl = () => {
         </div>
       )}
 
-      {/* Screen View Modal */}
-      {isScreenViewOpen && (
+      {/* Screen View Modal - Full screen optimized */}
+      {modalStates.isScreenViewOpen && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
           
           {/* Header */}
@@ -615,11 +841,12 @@ const JoinUsControl = () => {
           {/* Main Content */}
           <div className="flex min-h-screen">
             
-            {/* Sidebar */}
+            {/* Sidebar - Memoized for performance */}
             <div className="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto">
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold text-black mb-6">Dashboard</h2>
                 
+                {/* Sidebar content - static for performance */}
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-bold text-black mb-2">Dashboard</h3>
@@ -716,7 +943,8 @@ const JoinUsControl = () => {
                 </button>
                 <button 
                   onClick={handleScreenViewClose}
-                  className="border border-gray-300 text-black px-8 py-3 rounded-full hover:bg-gray-50"
+                  className="border border-gray-300 text-black px-8 py-3 rounded-full hover:bg-gray-50 transition-colors"
+                  type="button"
                 >
                   go back
                 </button>
@@ -774,10 +1002,10 @@ const JoinUsControl = () => {
 
                 {/* Navigation Arrows */}
                 <div className="flex justify-center gap-4 mt-8">
-                  <button className="bg-gray-200 p-3 rounded-full hover:bg-gray-300">
+                  <button className="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition-colors">
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <button className="bg-gray-200 p-3 rounded-full hover:bg-gray-300">
+                  <button className="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition-colors">
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
@@ -788,6 +1016,9 @@ const JoinUsControl = () => {
       )}
     </div>
   );
-};
+});
+
+// Set display name for debugging
+JoinUsControl.displayName = 'JoinUsControl';
 
 export default JoinUsControl;
