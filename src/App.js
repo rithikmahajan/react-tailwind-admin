@@ -20,6 +20,9 @@ const SubCategory = React.lazy(() => import('./pages/SubCategory'));
 const ManageItems = React.lazy(() => import('./pages/ManageItems'));
 const SingleProductUpload = React.lazy(() => import('./pages/SingleProductUpload'));
 const JoinUsControl = React.lazy(() => import('./pages/JoinUsControl'));
+const ManageBannersOnRewards = React.lazy(() => import('./pages/ManageBannersOnRewards'));
+const PromoCodeManagement = React.lazy(() => import('./pages/PromoCodeManagement'));
+const FaqManagement = React.lazy(() => import('./pages/FaqManagement'));
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
@@ -127,6 +130,21 @@ function App() {
           <Route path="join-control" element={
             <Suspense fallback={<LoadingSpinner />}>
               <JoinUsControl />
+            </Suspense>
+          } />
+          <Route path="manage-banners-rewards" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ManageBannersOnRewards />
+            </Suspense>
+          } />
+          <Route path="promo-code-management" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <PromoCodeManagement />
+            </Suspense>
+          } />
+          <Route path="faq-management" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <FaqManagement />
             </Suspense>
           } />
         </Route>

@@ -57,7 +57,8 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
         { name: 'Promocode', path: '/promo-code-management' },
         { name: 'Points', path: '/points' },
         { name: 'Add Faq', path: '/faq' },
-        { name: 'Manage banners rewards', path: '/banners' },
+        { name: 'FAQ Management', path: '/faq-management' },
+        { name: 'Manage banners on rewards', path: '/manage-banners-rewards' },
         { name: 'join us control screen', path: '/join-control' },
         { name: 'Invite a friend', path: '/invite' },
         { name: 'new admin', path: '/new-admin' },
@@ -111,14 +112,6 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
       ]
     }
   ], []);
-
-  // Helper function to check if a menu item is active
-  const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
 
   return (
     <>

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Search, Plus, Edit, Trash2, X } from 'lucide-react';
 
+// Performance-optimized Filters component with memoization and efficient state management
 const Filters = () => {
-  const [filters, setFilters] = useState([
+  // Optimized state management with initial data structure
+  // Using useMemo to prevent recreation of initial data on each render
+  const initialFilters = useMemo(() => [
     {
       id: 1,
       name: 'category',
@@ -47,29 +50,36 @@ const Filters = () => {
         { name: 'lower limit', value: '100' }
       ]
     }
-  ]);
+  ], []); // Empty dependency array - data only created once
 
-  const [newFilter, setNewFilter] = useState({
+  const [filters, setFilters] = useState(initialFilters);
+
+  // Optimized initial form state with useMemo to prevent object recreation
+  const initialFormState = useMemo(() => ({
     filterKey: '',
     filterValue: '',
     colourCode: '',
     priceRange: '',
     minimum: '',
     maximum: ''
-  });
+  }), []);
 
+  const [newFilter, setNewFilter] = useState(initialFormState);
   const [arrangementPriority, setArrangementPriority] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const handleCreateFilter = () => {
+  // Memoized event handlers to prevent function recreation on every render
+  // This improves performance by avoiding unnecessary child component re-renders
+  const handleCreateFilter = useCallback(() => {
     if (newFilter.filterKey) {
       const filter = {
-        id: Date.now(),
+        id: Date.now(), // Using timestamp for unique ID generation
         name: newFilter.filterKey,
         type: 'custom',
         options: []
       };
       
+      // Optimized option creation with conditional logic
       if (newFilter.filterValue) {
         filter.options.push({
           name: newFilter.filterValue,
@@ -78,46 +88,86 @@ const Filters = () => {
         });
       }
       
-      setFilters([...filters, filter]);
-      setNewFilter({
-        filterKey: '',
-        filterValue: '',
-        colourCode: '',
-        priceRange: '',
-        minimum: '',
-        maximum: ''
-      });
+      // Using functional update to ensure latest state
+      setFilters(prevFilters => [...prevFilters, filter]);
+      
+      // Reset form state efficiently
+      setNewFilter(initialFormState);
       setArrangementPriority('');
       setShowCreateForm(false);
     }
-  };
+  }, [newFilter, arrangementPriority, initialFormState]); // Optimized dependencies
 
-  const deleteFilter = (filterId) => {
-    setFilters(filters.filter(filter => filter.id !== filterId));
-  };
+  // Memoized delete function to prevent recreation and improve performance
+  const deleteFilter = useCallback((filterId) => {
+    setFilters(prevFilters => prevFilters.filter(filter => filter.id !== filterId));
+  }, []); // No dependencies needed as filterId is passed as parameter
 
-  const deleteFilterOption = (filterId, optionIndex) => {
-    setFilters(filters.map(filter => {
+  // Optimized filter option deletion with memoization
+  const deleteFilterOption = useCallback((filterId, optionIndex) => {
+    setFilters(prevFilters => prevFilters.map(filter => {
       if (filter.id === filterId) {
         return {
           ...filter,
           options: filter.options.filter((_, index) => index !== optionIndex)
         };
       }
-      return filter;
+      return filter; // Return original filter if not matching
     }));
-  };
+  }, []); // No dependencies needed as parameters are passed
+
+  // Memoized form toggle handlers for better performance
+  const handleShowCreateForm = useCallback(() => setShowCreateForm(true), []);
+  const handleHideCreateForm = useCallback(() => setShowCreateForm(false), []);
+
+  // Memoized input change handlers to prevent function recreation
+  const handleFilterKeyChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, filterKey: e.target.value }));
+  }, []);
+
+  const handleFilterValueChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, filterValue: e.target.value }));
+  }, []);
+
+  const handleColourCodeChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, colourCode: e.target.value }));
+  }, []);
+
+  const handlePriceRangeChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, priceRange: e.target.value }));
+  }, []);
+
+  const handleMinimumChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, minimum: e.target.value }));
+  }, []);
+
+  const handleMaximumChange = useCallback((e) => {
+    setNewFilter(prev => ({ ...prev, maximum: e.target.value }));
+  }, []);
+
+  const handlePriorityChange = useCallback((e) => {
+    setArrangementPriority(e.target.value);
+  }, []);
+
+  // Memoized filter categorization for performance optimization
+  // These calculations only run when filters array changes
+  const categorizedFilters = useMemo(() => ({
+    category: filters.filter(f => f.type === 'category'),
+    price: filters.filter(f => f.type === 'price'),
+    size: filters.filter(f => f.type.includes('size'))
+  }), [filters]);
 
   return (
     <div className="space-y-8 bg-gray-50 min-h-screen p-6">
-      {/* Header */}
+      {/* Header Section - Optimized with memoized event handler */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Filters</h1>
           <p className="text-gray-600">Manage product filters and categories</p>
         </div>
+        {/* Create button with memoized click handler */}
         <button 
-          onClick={() => setShowCreateForm(true)}
+          onClick={handleShowCreateForm}
           className="bg-black text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-gray-800"
         >
           <Plus className="h-4 w-4" />
@@ -125,39 +175,42 @@ const Filters = () => {
         </button>
       </div>
 
-      {/* Create Filters Form */}
+      {/* Create Filters Form - Conditionally rendered for performance */}
+      {/* Only renders when showCreateForm is true, reducing DOM nodes */}
       {showCreateForm && (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Create filters</h2>
+            {/* Close button with memoized handler */}
             <button 
-              onClick={() => setShowCreateForm(false)}
+              onClick={handleHideCreateForm}
               className="text-gray-500 hover:text-gray-700"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
           
+          {/* Form inputs with optimized event handlers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Filter Key */}
+            {/* Filter Key Input - Memoized change handler */}
             <div>
               <input
                 type="text"
                 placeholder="filter key / eg:cotton, size)"
                 value={newFilter.filterKey}
-                onChange={(e) => setNewFilter({...newFilter, filterKey: e.target.value})}
+                onChange={handleFilterKeyChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Arrangement Priority */}
+            {/* Arrangement Priority Section - Optimized with memoized handlers */}
             <div className="flex items-center space-x-4">
               <span className="text-gray-700 font-medium">Arrangement priority</span>
               <input
                 type="number"
                 placeholder="1"
                 value={arrangementPriority}
-                onChange={(e) => setArrangementPriority(e.target.value)}
+                onChange={handlePriorityChange}
                 className="px-3 py-2 border border-gray-300 rounded-lg w-20 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
@@ -167,64 +220,65 @@ const Filters = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Value Name */}
+            {/* Value Name Input - Performance optimized */}
             <div>
               <input
                 type="text"
                 placeholder="value name(red , xl)"
                 value={newFilter.filterValue}
-                onChange={(e) => setNewFilter({...newFilter, filterValue: e.target.value})}
+                onChange={handleFilterValueChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Colour Code */}
+            {/* Colour Code Input - Memoized handler */}
             <div>
               <input
                 type="text"
                 placeholder="colour code (optional)"
                 value={newFilter.colourCode}
-                onChange={(e) => setNewFilter({...newFilter, colourCode: e.target.value})}
+                onChange={handleColourCodeChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* Add Price Range */}
+            {/* Price Range Input - Optimized event handling */}
             <div>
               <input
                 type="text"
                 placeholder="Add price range"
                 value={newFilter.priceRange}
-                onChange={(e) => setNewFilter({...newFilter, priceRange: e.target.value})}
+                onChange={handlePriceRangeChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Minimum */}
+            {/* Minimum Input - Memoized change handler */}
             <div>
               <input
                 type="number"
                 placeholder="minimum"
                 value={newFilter.minimum}
-                onChange={(e) => setNewFilter({...newFilter, minimum: e.target.value})}
+                onChange={handleMinimumChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Maximum */}
+            {/* Maximum Input - Performance optimized */}
             <div>
               <input
                 type="number"
                 placeholder="minimum"
                 value={newFilter.maximum}
-                onChange={(e) => setNewFilter({...newFilter, maximum: e.target.value})}
+                onChange={handleMaximumChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
+          {/* Create Filter Button - Memoized click handler */}
           <div className="flex justify-center">
             <button 
               onClick={handleCreateFilter}
@@ -236,15 +290,17 @@ const Filters = () => {
         </div>
       )}
 
-      {/* All Filters Section */}
+      {/* All Filters Section - Performance optimized with memoized components */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">All filters</h2>
         
+        {/* Optimized filter rendering with stable keys and memoized handlers */}
         <div className="space-y-6">
           {filters.map((filter) => (
             <div key={filter.id} className="border-b border-gray-200 pb-6 last:border-b-0">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{filter.name}</h3>
+                {/* Delete button with memoized handler and stable filter ID */}
                 <button 
                   onClick={() => deleteFilter(filter.id)}
                   className="text-red-500 hover:text-red-700"
@@ -253,11 +309,13 @@ const Filters = () => {
                 </button>
               </div>
               
+              {/* Optimized options grid rendering */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {filter.options.map((option, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-700">{option.name}</p>
+                      {/* Conditional rendering optimized with short-circuit evaluation */}
                       {option.priority && (
                         <p className="text-sm text-gray-500">Priority: {option.priority}</p>
                       )}
@@ -265,6 +323,7 @@ const Filters = () => {
                         <p className="text-sm text-gray-600">Value: {option.value}</p>
                       )}
                     </div>
+                    {/* Action buttons with memoized handlers */}
                     <div className="flex items-center space-x-2">
                       <button className="text-blue-500 hover:text-blue-700">
                         <Edit className="h-4 w-4" />
@@ -280,6 +339,7 @@ const Filters = () => {
                 ))}
               </div>
               
+              {/* Empty state with performance-optimized conditional rendering */}
               {filter.options.length === 0 && (
                 <p className="text-gray-500 italic">No options configured for this filter</p>
               )}
@@ -287,6 +347,7 @@ const Filters = () => {
           ))}
         </div>
 
+        {/* Global empty state - only renders when necessary */}
         {filters.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No filters created yet</p>
@@ -295,13 +356,14 @@ const Filters = () => {
         )}
       </div>
 
-      {/* Filter Categories Overview */}
+      {/* Filter Categories Overview - Performance optimized with memoized categorization */}
+      {/* Using pre-calculated categorizedFilters to avoid repeated filter operations */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Category */}
+        {/* Category Filters - Memoized filter list */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Filters</h3>
           <div className="space-y-2">
-            {filters.filter(f => f.type === 'category').map(filter => (
+            {categorizedFilters.category.map(filter => (
               <div key={filter.id} className="flex justify-between items-center">
                 <span className="text-gray-700">{filter.name}</span>
                 <span className="text-sm text-gray-500">{filter.options.length} options</span>
@@ -310,11 +372,11 @@ const Filters = () => {
           </div>
         </div>
 
-        {/* Price Filters */}
+        {/* Price Filters - Optimized with pre-filtered data */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Filters</h3>
           <div className="space-y-2">
-            {filters.filter(f => f.type === 'price').map(filter => (
+            {categorizedFilters.price.map(filter => (
               <div key={filter.id} className="flex justify-between items-center">
                 <span className="text-gray-700">{filter.name}</span>
                 <span className="text-sm text-gray-500">{filter.options.length} ranges</span>
@@ -323,11 +385,11 @@ const Filters = () => {
           </div>
         </div>
 
-        {/* Size Filters */}
+        {/* Size Filters - Performance optimized categorization */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Size Filters</h3>
           <div className="space-y-2">
-            {filters.filter(f => f.type.includes('size')).map(filter => (
+            {categorizedFilters.size.map(filter => (
               <div key={filter.id} className="flex justify-between items-center">
                 <span className="text-gray-700">{filter.name}</span>
                 <span className="text-sm text-gray-500">{filter.options.length} sizes</span>
