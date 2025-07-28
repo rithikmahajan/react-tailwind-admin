@@ -9,6 +9,8 @@ const UploadCategory = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState(null);
 
   // Sample category data - matches the Figma design
   const categories = [
@@ -71,7 +73,21 @@ const UploadCategory = () => {
   };
 
   const handleDelete = (categoryId) => {
-    console.log('Delete category:', categoryId);
+    const categoryToDelete = categories.find(cat => cat.id === categoryId);
+    setDeletingCategory(categoryToDelete);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log('Deleting category:', deletingCategory.id);
+    // Here you would typically remove the category from your state or make an API call
+    setIsDeleteModalOpen(false);
+    setDeletingCategory(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingCategory(null);
   };
 
   const filteredCategories = categories.filter(category =>
@@ -310,6 +326,41 @@ const UploadCategory = () => {
               >
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && deletingCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            
+            {/* Modal Content */}
+            <div className="p-8 text-center">
+              
+              {/* Delete Confirmation Message */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Are you sure you</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">want to delete this</h2>
+                <h2 className="text-xl font-bold text-gray-900">category</h2>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 bg-black hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  yes
+                </button>
+                <button
+                  onClick={handleCancelDelete}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
