@@ -9,6 +9,7 @@ const ManageItems = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [newDetails, setNewDetails] = useState('');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   // Sample items data - matches the Figma design
   const items = [
@@ -91,12 +92,17 @@ const ManageItems = () => {
     setIsEditModalOpen(false);
     setEditingItem(null);
     setNewDetails('');
+    setIsSuccessModalOpen(true);
   };
 
   const handleCloseEdit = () => {
     setIsEditModalOpen(false);
     setEditingItem(null);
     setNewDetails('');
+  };
+
+  const handleCloseSuccess = () => {
+    setIsSuccessModalOpen(false);
   };
 
   const handleDelete = (itemId) => {
@@ -476,6 +482,39 @@ const ManageItems = () => {
                   go back
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 relative">
+            
+            {/* Close Button */}
+            <button
+              onClick={handleCloseSuccess}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Modal Content */}
+            <div className="p-8 text-center">
+              
+              {/* Success Message */}
+              <h2 className="text-lg font-bold text-black mb-8 leading-tight">
+                Item Details updated successfully!
+              </h2>
+
+              {/* Done Button */}
+              <button
+                onClick={handleCloseSuccess}
+                className="bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 min-w-[120px]"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
