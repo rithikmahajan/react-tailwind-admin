@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
+import ReturnOrders from './pages/ReturnOrders';
 import Analytics from './pages/Analytics';
 import Filters from './pages/Filters';
 import ItemDetails from './pages/ItemDetails';
@@ -21,6 +22,7 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="products" element={<Products />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="return-orders" element={<ReturnOrders />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="filters" element={<Filters />} />
           <Route path="item-details" element={<ItemDetails />} />

@@ -11,7 +11,8 @@ import {
   Mail,
   X,
   Filter,
-  FileText
+  FileText,
+  RotateCcw
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -22,6 +23,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Users', icon: Users, path: '/users' },
     { name: 'Products', icon: Package, path: '/products' },
     { name: 'Orders', icon: ShoppingCart, path: '/orders' },
+    { name: 'Return Orders', icon: RotateCcw, path: '/return-orders' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
     { name: 'Filters', icon: Filter, path: '/filters' },
     { name: 'Item Details', icon: FileText, path: '/item-details' },
