@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Users, Package, ShoppingCart, DollarSign, TrendingUp, TrendingDown, 
   Calendar, Search, Plus, ChevronDown, BarChart3, Activity, 
-  MessageSquare, FileText, Settings, Sync, CheckCircle, XCircle
+  MessageSquare, FileText, Settings, RefreshCw, CheckCircle, XCircle
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -52,7 +52,7 @@ const Dashboard = () => {
       change: '+1.3%',
       changeType: 'increase',
       period: 'Up from past week',
-      icon: Sync,
+      icon: RefreshCw,
       color: 'bg-indigo-500'
     }
   ];
