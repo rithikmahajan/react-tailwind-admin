@@ -12,7 +12,8 @@ import {
   X,
   Filter,
   FileText,
-  RotateCcw
+  RotateCcw,
+  Star
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -24,6 +25,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Products', icon: Package, path: '/products' },
     { name: 'Orders', icon: ShoppingCart, path: '/orders' },
     { name: 'Return Orders', icon: RotateCcw, path: '/return-orders' },
+    { name: 'Manage Reviews', icon: Star, path: '/manage-reviews' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
     { name: 'Filters', icon: Filter, path: '/filters' },
     { name: 'Item Details', icon: FileText, path: '/item-details' },
