@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
@@ -52,8 +53,22 @@ const AdminLayout = React.memo(() => {
       {!sidebarHidden && (
         <Sidebar 
           sidebarOpen={sidebarOpen} 
-          setSidebarOpen={handleSidebarToggle} 
+          setSidebarOpen={handleSidebarToggle}
+          sidebarHidden={sidebarHidden}
+          onToggleSidebarVisibility={handleSidebarVisibilityToggle}
         />
+      )}
+
+      {/* Show Sidebar Button - appears when sidebar is hidden */}
+      {sidebarHidden && (
+        <button
+          onClick={handleSidebarVisibilityToggle}
+          className="fixed top-[140px] left-4 w-8 h-8 bg-white border border-gray-300 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 z-50"
+          aria-label="Show sidebar"
+          title="Show sidebar"
+        >
+          <ChevronRight className="w-4 h-4 text-gray-600" />
+        </button>
       )}
       
       {/* Main content area */}

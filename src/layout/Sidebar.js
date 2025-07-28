@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 /**
  * Sidebar Component
@@ -16,7 +17,7 @@ import { Link, useLocation } from 'react-router-dom';
  * - Efficient active state checking
  * - Proper prop types and default values
  */
-const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen, sidebarHidden, onToggleSidebarVisibility }) => {
   const location = useLocation();
 
   // Memoized menu configuration to prevent recreation on each render
@@ -129,7 +130,17 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 overflow-y-auto ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } pt-[60px]`}>
+      } pt-[60px] relative`}>
+        
+        {/* Arrow Toggle Button */}
+        <button
+          onClick={onToggleSidebarVisibility}
+          className="absolute top-[80px] -right-4 w-8 h-8 bg-white border border-gray-300 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 z-50"
+          aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+          title={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+        >
+          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        </button>
         
         {/* Sidebar Content */}
         <div className="p-6 space-y-6">
