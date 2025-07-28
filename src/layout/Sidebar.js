@@ -62,6 +62,7 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
         { name: 'join us control screen', path: '/join-control' },
         { name: 'Invite a friend', path: '/invite' },
         { name: 'new admin', path: '/new-admin' },
+        { name: 'new partner', path: '/new-partner' },
         { name: 'Arrangement control', path: '/arrangement' },
         { name: 'product bundling', path: '/bundling' }
       ]
@@ -83,6 +84,7 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
         { name: 'Cart abandonment recovery', path: '/cart-recovery' },
         { name: 'send promo notification', path: '/promo-notification' },
         { name: 'send notification in app', path: '/in-app-notification' },
+        { name: 'notifications from app', path: '/notifications-from-app' },
         { name: 'Email and sms template mgt screen', path: '/templates' },
         { name: 'push notification', path: '/push-notification' }
       ]

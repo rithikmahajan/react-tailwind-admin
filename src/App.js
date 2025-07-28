@@ -23,6 +23,10 @@ const JoinUsControl = React.lazy(() => import('./pages/JoinUsControl'));
 const ManageBannersOnRewards = React.lazy(() => import('./pages/ManageBannersOnRewards'));
 const PromoCodeManagement = React.lazy(() => import('./pages/PromoCodeManagement'));
 const FaqManagement = React.lazy(() => import('./pages/FaqManagement'));
+const ProductBundling = React.lazy(() => import('./pages/ProductBundling'));
+const ArrangementControl = React.lazy(() => import('./pages/ArrangementControl'));
+const NewPartner = React.lazy(() => import('./pages/NewPartner'));
+const NotificationFromApp = React.lazy(() => import('./pages/NotificationFromApp'));
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
@@ -145,6 +149,26 @@ function App() {
           <Route path="faq-management" element={
             <Suspense fallback={<LoadingSpinner />}>
               <FaqManagement />
+            </Suspense>
+          } />
+          <Route path="bundling" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ProductBundling />
+            </Suspense>
+          } />
+          <Route path="arrangement" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ArrangementControl />
+            </Suspense>
+          } />
+          <Route path="new-partner" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <NewPartner />
+            </Suspense>
+          } />
+          <Route path="notifications-from-app" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <NotificationFromApp />
             </Suspense>
           } />
         </Route>
