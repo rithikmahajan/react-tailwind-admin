@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Users, Package, ShoppingCart, DollarSign, TrendingUp, TrendingDown, 
-  Calendar, Search, Plus, ChevronDown, BarChart3, Activity, 
-  MessageSquare, FileText, Settings, RefreshCw, CheckCircle, XCircle
+  Calendar, Search, Plus, BarChart3, RefreshCw
 } from 'lucide-react';
 
 /**
@@ -147,7 +146,7 @@ const Dashboard = () => {
   const syncLogs = useMemo(() => [
     { id: 1, date: 'Nov 11,2025', operation: 'product sync', marketplace: 'amazon', status: 'success', error: null },
     { id: 2, date: 'Nov 11,2025', operation: 'inventory sync', marketplace: 'flipkart', status: 'fail', error: 'connection timeout' },
-    { id: 3, date: 'Nov 11,2025', operation: 'success', marketplace: 'ajio', status: 'fail', error: 'invalid credentials' }
+    { id: 3, date: 'Nov 11,2025', operation: 'product sync', marketplace: 'ajio', status: 'fail', error: 'invalid credentials' }
   ], []);
 
   // Callback for handling time range changes (prevents unnecessary re-renders)

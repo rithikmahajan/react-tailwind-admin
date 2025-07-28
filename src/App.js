@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLayout from './layout/AdminLayout';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard_optimized';
 import Users from './pages/Users';
 import Products from './pages/Products';
 import Orders from './pages/Orders';

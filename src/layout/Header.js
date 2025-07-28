@@ -1,46 +1,47 @@
 import React from 'react';
-import { Menu, Bell, Search, User } from 'lucide-react';
+import { Search, MessageSquare, Bell, User } from 'lucide-react';
 
 const Header = ({ setSidebarOpen }) => {
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="flex items-center justify-between px-6 py-4">
-        {/* Left side */}
+    <header className="bg-white h-[60px] w-full max-w-[1920px] relative">
+      <div className="flex items-center justify-between h-full px-16">
+        {/* Left side - Logo */}
         <div className="flex items-center">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="text-gray-500 hover:text-gray-700 lg:hidden"
-          >
-            <Menu size={24} />
-          </button>
-          
-          {/* Search bar */}
-          <div className="relative ml-4 lg:ml-0">
+          <div className="text-2xl font-bold text-black tracking-wide">
+            YORAA
+          </div>
+        </div>
+
+        {/* Center - Search Form */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="relative w-40">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className="h-[26px] w-[26px] text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Search..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder=""
+              className="block w-full pl-12 pr-3 py-3 border border-gray-300 rounded-3xl leading-5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
         </div>
 
-        {/* Right side */}
+        {/* Right side - Action Icons */}
         <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200">
-            <Bell size={20} />
+          {/* Favourites/Chat Icon - Rounded button */}
+          <button className="w-[33px] h-[33px] bg-gray-100 hover:bg-gray-200 rounded-[30px] flex items-center justify-center transition-colors duration-200">
+            <MessageSquare className="w-4 h-4 text-gray-600" />
           </button>
 
-          {/* Profile dropdown */}
-          <div className="relative">
-            <button className="flex items-center space-x-2 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors duration-200">
-              <User size={20} />
-              <span className="hidden md:block text-sm font-medium text-gray-700">Admin</span>
-            </button>
-          </div>
+          {/* SMS/Message Icon */}
+          <button className="w-6 h-6 text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <MessageSquare className="w-full h-full" />
+          </button>
+
+          {/* Profile/User Icon */}
+          <button className="w-[21.85px] h-[22px] text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <User className="w-full h-full" />
+          </button>
         </div>
       </div>
     </header>

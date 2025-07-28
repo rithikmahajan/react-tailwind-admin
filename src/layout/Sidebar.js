@@ -1,36 +1,99 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  Home,
-  Users,
-  Package,
-  ShoppingCart,
-  BarChart,
-  Settings,
-  User,
-  Mail,
-  X,
-  Filter,
-  FileText,
-  RotateCcw,
-  FolderPlus
-} from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
-  const menuItems = [
-    { name: 'Dashboard', icon: Home, path: '/' },
-    { name: 'Users', icon: Users, path: '/users' },
-    { name: 'Products', icon: Package, path: '/products' },
-    { name: 'Orders', icon: ShoppingCart, path: '/orders' },
-    { name: 'Return Orders', icon: RotateCcw, path: '/return-orders' },
-    { name: 'Analytics', icon: BarChart, path: '/analytics' },
-    { name: 'Filters', icon: Filter, path: '/filters' },
-    { name: 'Item Details', icon: FileText, path: '/item-details' },
-    { name: 'Profile', icon: User, path: '/profile' },
-    { name: 'Messages', icon: Mail, path: '/messages' },
-    { name: 'Settings', icon: Settings, path: '/settings' },
+  const menuSections = [
+    {
+      title: 'Dashboard',
+      titleSize: 'text-2xl',
+      items: [
+        { name: 'Dashboard', path: '/' }
+      ]
+    },
+    {
+      title: 'App order area',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'return requests', path: '/return-orders' },
+        { name: 'orders', path: '/orders' },
+        { name: 'Inbox', path: '/messages' },
+        { name: 'vendor messages', path: '/messages' },
+        { name: 'Users', path: '/users' }
+      ]
+    },
+    {
+      title: 'App uploading area',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'Category', path: '/upload-category' },
+        { name: 'Subcategory', path: '/subcategory' },
+        { name: 'Items', path: '/manage-items' },
+        { name: 'Item details', path: '/item-details' }
+      ]
+    },
+    {
+      title: 'App functional area',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'Filters', path: '/filters' },
+        { name: 'Promocode', path: '/promo-code-management' },
+        { name: 'Points', path: '/points' },
+        { name: 'Add Faq', path: '/faq' },
+        { name: 'Manage banners rewards', path: '/banners' },
+        { name: 'join us control screen', path: '/join-control' },
+        { name: 'Invite a friend', path: '/invite' },
+        { name: 'new admin', path: '/new-admin' },
+        { name: 'Arrangement control', path: '/arrangement' },
+        { name: 'product bundling', path: '/bundling' }
+      ]
+    },
+    {
+      title: 'App setting area',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'Communication preferences', path: '/communication' },
+        { name: 'language country and region', path: '/language' },
+        { name: 'hugging face api open close', path: '/api-settings' },
+        { name: 'Profile visibility', path: '/profile-visibility' }
+      ]
+    },
+    {
+      title: 'App promotional area',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'Cart abandonment recovery', path: '/cart-recovery' },
+        { name: 'send promo notification', path: '/promo-notification' },
+        { name: 'send notification in app', path: '/in-app-notification' },
+        { name: 'Email and sms template mgt screen', path: '/templates' },
+        { name: 'push notification', path: '/push-notification' }
+      ]
+    },
+    {
+      title: 'Analytics & Data base',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'analytics reports', path: '/analytics' },
+        { name: 'Data base', path: '/database' }
+      ]
+    },
+    {
+      title: 'Others',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'support chat log', path: '/support-logs' },
+        { name: 'Logs/error tracking integration', path: '/error-logs' },
+        { name: 'staging environment toggle', path: '/staging' }
+      ]
+    },
+    {
+      title: 'Settings',
+      titleSize: 'text-xl',
+      items: [
+        { name: 'Settings', path: '/settings' }
+      ]
+    }
   ];
 
   return (
@@ -44,88 +107,49 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <div className={`fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 overflow-y-auto ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* App uploading area */}
-        <div className="p-4 border-b bg-gray-50">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">App uploading area</h3>
-          <div className="space-y-2">
-            <Link 
-              to="/upload-category" 
-              className={`block text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 ${
-                location.pathname === '/upload-category' ? 'text-blue-600 font-semibold' : ''
-              }`}
-            >
-              Category
-            </Link>
-            <Link 
-              to="/subcategory" 
-              className={`block text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 ${
-                location.pathname === '/subcategory' ? 'text-blue-600 font-semibold' : ''
-              }`}
-            >
-              Subcategory
-            </Link>
-            <p className="text-sm font-medium text-gray-600">Items</p>
-            <Link 
-              to="/manage-items" 
-              className={`block text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 ${
-                location.pathname === '/manage-items' ? 'text-blue-600 font-semibold' : ''
-              }`}
-            >
-              Item details
-            </Link>
-            <p className="text-sm font-medium text-gray-600">Filters</p>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="mt-6">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            
-            return (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 ${
-                  isActive ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : ''
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <Icon size={20} className="mr-3" />
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* User info at bottom */}
-        <div className="absolute bottom-0 w-full p-4 border-t bg-gray-50">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-              A
+        {/* Sidebar Content */}
+        <div className="p-6 space-y-6">
+          {menuSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="space-y-3">
+              {/* Section Title */}
+              <h3 className={`font-bold text-gray-900 ${section.titleSize} ${section.title === 'Dashboard' ? 'mb-2' : 'mb-4'}`}>
+                {section.title}
+              </h3>
+              
+              {/* Section Items */}
+              <div className="space-y-2">
+                {section.items.map((item, itemIndex) => {
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <Link
+                      key={itemIndex}
+                      to={item.path}
+                      className={`block text-[15px] font-normal leading-[15px] transition-colors duration-200 ${
+                        isActive 
+                          ? 'text-blue-600 font-semibold' 
+                          : 'text-gray-700 hover:text-blue-600'
+                      } ${
+                        section.title === 'Dashboard' 
+                          ? 'text-[15px]' 
+                          : 'text-[15px] ml-1'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">Admin User</p>
-              <p className="text-xs text-gray-500">admin@example.com</p>
-            </div>
-          </div>
+          ))}
         </div>
+
+        {/* Vertical divider line (visible in design) */}
+        <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-200"></div>
       </div>
     </>
   );
