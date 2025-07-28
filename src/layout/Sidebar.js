@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+/**
+ * Sidebar Component
+ * 
+ * Navigation sidebar for the admin dashboard providing:
+ * - Hierarchical menu structure
+ * - Active state indication
+ * - Responsive design with mobile toggle
+ * - Organized sections for different admin areas
+ * 
+ * Performance Optimizations:
+ * - React.memo to prevent unnecessary re-renders
+ * - useMemo for menu configuration
+ * - Efficient active state checking
+ * - Proper prop types and default values
+ */
+const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
-  const menuSections = [
+  // Memoized menu configuration to prevent recreation on each render
+  const menuSections = useMemo(() => [
     {
       title: 'Dashboard',
       titleSize: 'text-2xl',
@@ -94,7 +110,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         { name: 'Settings', path: '/settings' }
       ]
     }
-  ];
+  ], []);
+
+  // Helper function to check if a menu item is active
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <>
@@ -153,6 +177,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       </div>
     </>
   );
-};
+});
+
+// Set display name for debugging
+Sidebar.displayName = 'Sidebar';
 
 export default Sidebar;

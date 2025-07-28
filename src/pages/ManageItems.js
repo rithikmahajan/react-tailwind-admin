@@ -1,18 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Search, Edit2, Trash2, ChevronDown, Upload, Plus, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CATEGORY_OPTIONS, SUBCATEGORY_OPTIONS, STATUS_STYLES } from '../constants';
+import { useDebounce } from '../hooks';
 
-const ManageItems = () => {
+/**
+ * ManageItems Component
+ * 
+ * Main product management interface providing:
+ * - Product listing with search and filtering
+ * - Bulk operations and single item actions
+ * - Navigation to product upload forms
+ * - Edit modal with detailed product information
+ * 
+ * Performance Optimizations:
+ * - useMemo for filtered items to prevent unnecessary recalculations
+ * - useCallback for event handlers to prevent child re-renders
+ * - Efficient state management with minimal re-renders
+ * - Optimized table rendering with proper key props
+ */
+
+const ManageItems = React.memo(() => {
+  const navigate = useNavigate();
+  
+  // State management - grouped by functionality for better organization
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All categories');
   const [selectedSubCategory, setSelectedSubCategory] = useState('All subcategories');
   const [selectedItems, setSelectedItems] = useState([]);
+  
+  // Modal state management
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [newDetails, setNewDetails] = useState('');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  // Sample items data - matches the Figma design
-  const items = [
+  // Debounced search term for performance optimization
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Sample items data - in production, this would come from an API or state management
+  // TODO: Replace with actual data fetching logic
+  // Memoized to prevent unnecessary re-renders
+  const items = useMemo(() => [
     {
       id: 1,
       image: '/api/placeholder/80/80',
@@ -43,116 +72,107 @@ const ManageItems = () => {
       status: 'Scheduled',
       metaData: 'they meta data'
     }
-  ];
+  ], []);
 
-  const categoryOptions = [
-    'All categories',
-    'Electronics',
-    'Clothing',
-    'Home & Garden',
-    'Sports',
-    'Books',
-    'Toys'
-  ];
+  // Memoized filtered items - only recalculates when dependencies change
+  // Now using debounced search term for better performance
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      const matchesSearch = item.productName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           item.category.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           item.subCategories.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      
+      const matchesCategory = selectedCategory === 'All categories' || 
+                             item.category === selectedCategory;
+      
+      const matchesSubCategory = selectedSubCategory === 'All subcategories' || 
+                                item.subCategories === selectedSubCategory;
+      
+      return matchesSearch && matchesCategory && matchesSubCategory;
+    });
+  }, [items, debouncedSearchTerm, selectedCategory, selectedSubCategory]);
 
-  const subCategoryOptions = [
-    'All subcategories',
-    'Smartphones',
-    'Laptops',
-    'Cameras',
-    'Accessories'
-  ];
-
-  const handleSelectItem = (itemId) => {
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleSelectItem = useCallback((itemId) => {
     setSelectedItems(prev => 
       prev.includes(itemId) 
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
-  };
+  }, []);
 
-  const handleSelectAll = () => {
-    if (selectedItems.length === items.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(items.map(item => item.id));
-    }
-  };
+  const handleSelectAll = useCallback(() => {
+    setSelectedItems(prev => 
+      prev.length === filteredItems.length ? [] : filteredItems.map(item => item.id)
+    );
+  }, [filteredItems]);
 
-  const handleEdit = (itemId) => {
+  // Navigation handlers
+  const handleBulkUpload = useCallback(() => {
+    console.log('Bulk upload');
+    // TODO: Implement bulk upload functionality
+  }, []);
+
+  const handleUploadSingleProduct = useCallback(() => {
+    navigate('/single-product-upload');
+  }, [navigate]);
+
+  // Edit modal handlers
+  const handleEdit = useCallback((itemId) => {
     const itemToEdit = items.find(item => item.id === itemId);
     setEditingItem(itemToEdit);
     setNewDetails('');
     setIsEditModalOpen(true);
-  };
+  }, [items]);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = useCallback(() => {
     console.log('Saving edit for item:', editingItem.id, 'New details:', newDetails);
-    // Here you would typically update the item in your state or make an API call
+    // TODO: Implement actual save logic with API call
     setIsEditModalOpen(false);
     setEditingItem(null);
     setNewDetails('');
     setIsSuccessModalOpen(true);
-  };
+  }, [editingItem, newDetails]);
 
-  const handleCloseEdit = () => {
+  const handleCloseEdit = useCallback(() => {
     setIsEditModalOpen(false);
     setEditingItem(null);
     setNewDetails('');
-  };
+  }, []);
 
-  const handleCloseSuccess = () => {
+  const handleCloseSuccess = useCallback(() => {
     setIsSuccessModalOpen(false);
-  };
+  }, []);
 
-  const handleDelete = (itemId) => {
+  const handleDelete = useCallback((itemId) => {
     console.log('Delete item:', itemId);
-  };
+    // TODO: Implement delete functionality
+  }, []);
 
-  const handleBulkUpload = () => {
-    console.log('Bulk upload');
-  };
-
-  const handleUploadSingleProduct = () => {
-    console.log('Upload single product');
-  };
-
-  const filteredItems = items.filter(item =>
-    item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.subCategories.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getSizeDisplay = (sizes) => {
+  // Utility functions
+  const getSizeDisplay = useCallback((sizes) => {
     return sizes.join(', ');
-  };
+  }, []);
 
-  const getStatusStyle = (status) => {
-    switch (status.toLowerCase()) {
-      case 'live':
-        return 'bg-green-100 text-green-800';
-      case 'scheduled':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const getStatusStyle = useCallback((status) => {
+    return STATUS_STYLES[status] || STATUS_STYLES.draft;
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Main Content Container */}
+      {/* Main Content Container with shadow and styling */}
       <div className="max-w-full mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
         
-        {/* Header */}
+        {/* Header Section - Title and Action Buttons */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Manage Items</h1>
+            {/* Action buttons container */}
             <div className="flex gap-3">
               <button 
                 onClick={handleBulkUpload}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Upload multiple products at once"
               >
                 <Upload className="h-4 w-4" />
                 Bulk Upload
@@ -160,6 +180,7 @@ const ManageItems = () => {
               <button 
                 onClick={handleUploadSingleProduct}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Upload a single product"
               >
                 <Plus className="h-4 w-4" />
                 Upload single product
@@ -167,31 +188,33 @@ const ManageItems = () => {
             </div>
           </div>
           
-          {/* Controls Section */}
+          {/* Search and Filter Controls Section */}
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
             
-            {/* Search Bar */}
+            {/* Search Bar with icon */}
             <div className="relative flex-1 max-w-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search products, categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                aria-label="Search products"
               />
             </div>
 
-            {/* Category Dropdown */}
+            {/* Category Filter Dropdown */}
             <div className="relative">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="appearance-none bg-white border border-gray-400 rounded-xl px-4 py-3 pr-8 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+                aria-label="Filter by category"
               >
-                {categoryOptions.map((option, index) => (
+                {CATEGORY_OPTIONS.map((option, index) => (
                   <option key={index} value={option}>{option}</option>
                 ))}
               </select>
@@ -200,14 +223,15 @@ const ManageItems = () => {
               </div>
             </div>
 
-            {/* Sub Category Dropdown */}
+            {/* Sub Category Filter Dropdown */}
             <div className="relative">
               <select
                 value={selectedSubCategory}
                 onChange={(e) => setSelectedSubCategory(e.target.value)}
                 className="appearance-none bg-white border border-gray-400 rounded-xl px-4 py-3 pr-8 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]"
+                aria-label="Filter by subcategory"
               >
-                {subCategoryOptions.map((option, index) => (
+                {SUBCATEGORY_OPTIONS.map((option, index) => (
                   <option key={index} value={option}>{option}</option>
                 ))}
               </select>
@@ -218,20 +242,21 @@ const ManageItems = () => {
           </div>
         </div>
 
-        {/* Table Section */}
+        {/* Table Section with Product Data */}
         <div className="p-6">
           
-          {/* Table */}
+          {/* Responsive Table Container */}
           <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-            {/* Table Header */}
+            {/* Table Header - Column definitions */}
             <div className="bg-gray-50 border-b border-gray-200">
               <div className="grid grid-cols-12 gap-2 p-4 text-xs font-bold text-gray-700">
                 <div className="col-span-1 flex items-center">
                   <input
                     type="checkbox"
-                    checked={selectedItems.length === items.length && items.length > 0}
+                    checked={selectedItems.length === filteredItems.length && filteredItems.length > 0}
                     onChange={handleSelectAll}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    aria-label="Select all items"
                   />
                 </div>
                 <div className="col-span-1">Image</div>
@@ -248,93 +273,110 @@ const ManageItems = () => {
               </div>
             </div>
 
-            {/* Table Rows */}
+            {/* Table Rows - Optimized rendering with proper keys */}
             <div className="divide-y divide-gray-100">
               {filteredItems.map((item) => (
-                <div key={item.id} className="grid grid-cols-12 gap-2 p-4 items-center hover:bg-gray-50 transition-colors text-sm">
+                <div 
+                  key={item.id} 
+                  className="grid grid-cols-12 gap-2 p-4 items-center hover:bg-gray-50 transition-colors text-sm"
+                >
                   
-                  {/* Checkbox */}
+                  {/* Checkbox Column */}
                   <div className="col-span-1">
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(item.id)}
                       onChange={() => handleSelectItem(item.id)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      aria-label={`Select ${item.productName}`}
                     />
                   </div>
 
-                  {/* Image */}
+                  {/* Product Image Column */}
                   <div className="col-span-1">
                     <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden">
                       <img
                         src={item.image}
-                        alt={item.productName}
+                        alt={`${item.productName} product image`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                   </div>
 
-                  {/* Product Name */}
+                  {/* Product Name Column */}
                   <div className="col-span-1">
-                    <p className="font-medium text-gray-900">{item.productName}</p>
+                    <p className="font-medium text-gray-900 truncate" title={item.productName}>
+                      {item.productName}
+                    </p>
                   </div>
 
-                  {/* Category */}
+                  {/* Category Column */}
                   <div className="col-span-1">
-                    <p className="text-gray-600">{item.category}</p>
+                    <p className="text-gray-600 truncate" title={item.category}>
+                      {item.category}
+                    </p>
                   </div>
 
-                  {/* Sub Categories */}
+                  {/* Sub Categories Column */}
                   <div className="col-span-1">
-                    <p className="text-gray-600">{item.subCategories}</p>
+                    <p className="text-gray-600 truncate" title={item.subCategories}>
+                      {item.subCategories}
+                    </p>
                   </div>
 
-                  {/* Size */}
+                  {/* Size Column */}
                   <div className="col-span-1">
-                    <p className="text-gray-600">{getSizeDisplay(item.size)}</p>
+                    <p className="text-gray-600 truncate" title={getSizeDisplay(item.size)}>
+                      {getSizeDisplay(item.size)}
+                    </p>
                   </div>
 
-                  {/* Quantity */}
+                  {/* Quantity Column */}
                   <div className="col-span-1">
                     <p className="text-gray-600">{item.quantity}</p>
                   </div>
 
-                  {/* Price */}
+                  {/* Price Column */}
                   <div className="col-span-1">
                     <p className="text-gray-600">₹{item.price}</p>
                   </div>
 
-                  {/* Sale Price */}
+                  {/* Sale Price Column */}
                   <div className="col-span-1">
                     <p className="text-gray-600">₹{item.salePrice}</p>
                   </div>
 
-                  {/* SKU */}
+                  {/* SKU Column */}
                   <div className="col-span-1">
-                    <p className="text-gray-600 text-xs">{item.sku}</p>
+                    <p className="text-gray-600 text-xs truncate" title={item.sku}>
+                      {item.sku}
+                    </p>
                   </div>
 
-                  {/* Status */}
+                  {/* Status Column with colored badges */}
                   <div className="col-span-1">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusStyle(item.status)}`}>
                       {item.status}
                     </span>
                   </div>
 
-                  {/* Action */}
+                  {/* Action Column with edit and delete buttons */}
                   <div className="col-span-1">
                     <div className="flex space-x-1">
                       <button
                         onClick={() => handleEdit(item.id)}
                         className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-                        title="Edit"
+                        title={`Edit ${item.productName}`}
+                        aria-label={`Edit ${item.productName}`}
                       >
                         <Edit2 className="h-3 w-3" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Delete"
+                        title={`Delete ${item.productName}`}
+                        aria-label={`Delete ${item.productName}`}
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
@@ -344,10 +386,16 @@ const ManageItems = () => {
               ))}
             </div>
 
-            {/* Empty State */}
+            {/* Empty State - shown when no items match filters */}
             {filteredItems.length === 0 && (
               <div className="p-8 text-center text-gray-500">
-                <p>No items found matching your search.</p>
+                <p className="text-lg font-medium mb-2">No items found</p>
+                <p className="text-sm">
+                  {searchTerm || selectedCategory !== 'All categories' || selectedSubCategory !== 'All subcategories'
+                    ? 'Try adjusting your search or filters'
+                    : 'Start by uploading your first product'
+                  }
+                </p>
               </div>
             )}
           </div>
@@ -521,6 +569,9 @@ const ManageItems = () => {
       )}
     </div>
   );
-};
+});
+
+// Set display name for debugging
+ManageItems.displayName = 'ManageItems';
 
 export default ManageItems;
