@@ -19,6 +19,7 @@ const UploadCategory = React.lazy(() => import('./pages/UploadCategory'));
 const SubCategory = React.lazy(() => import('./pages/SubCategory'));
 const ManageItems = React.lazy(() => import('./pages/ManageItems'));
 const SingleProductUpload = React.lazy(() => import('./pages/SingleProductUpload'));
+const JoinUsControl = React.lazy(() => import('./pages/JoinUsControl'));
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
@@ -121,6 +122,11 @@ function App() {
           <Route path="single-product-upload" element={
             <Suspense fallback={<LoadingSpinner />}>
               <SingleProductUpload />
+            </Suspense>
+          } />
+          <Route path="join-control" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <JoinUsControl />
             </Suspense>
           } />
         </Route>
