@@ -7,6 +7,7 @@ import Products from './pages/Products';
 import Orders from './pages/Orders';
 import Analytics from './pages/Analytics';
 import Filters from './pages/Filters';
+import ItemDetails from './pages/ItemDetails';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
@@ -22,6 +23,7 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="filters" element={<Filters />} />
+          <Route path="item-details" element={<ItemDetails />} />
           <Route path="profile" element={<Profile />} />
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
