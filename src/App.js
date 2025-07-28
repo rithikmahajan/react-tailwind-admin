@@ -14,6 +14,7 @@ import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import UploadCategory from './pages/UploadCategory';
 import SubCategory from './pages/SubCategory';
+import ManageItems from './pages/ManageItems';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="upload-category" element={<UploadCategory />} />
           <Route path="subcategory" element={<SubCategory />} />
+          <Route path="manage-items" element={<ManageItems />} />
         </Route>
       </Routes>
     </Router>
