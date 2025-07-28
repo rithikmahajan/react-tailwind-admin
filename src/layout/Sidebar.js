@@ -13,8 +13,7 @@ import {
   Filter,
   FileText,
   RotateCcw,
-  Star,
-  Percent
+  FolderPlus
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -26,8 +25,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Products', icon: Package, path: '/products' },
     { name: 'Orders', icon: ShoppingCart, path: '/orders' },
     { name: 'Return Orders', icon: RotateCcw, path: '/return-orders' },
-    { name: 'Manage Reviews', icon: Star, path: '/manage-reviews' },
-    { name: 'Promo Code Management', icon: Percent, path: '/promo-code-management' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
     { name: 'Filters', icon: Filter, path: '/filters' },
     { name: 'Item Details', icon: FileText, path: '/item-details' },
@@ -66,7 +63,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="p-4 border-b bg-gray-50">
           <h3 className="text-lg font-bold text-gray-800 mb-3">App uploading area</h3>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-600">Category</p>
+            <Link 
+              to="/upload-category" 
+              className={`block text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 ${
+                location.pathname === '/upload-category' ? 'text-blue-600 font-semibold' : ''
+              }`}
+            >
+              Category
+            </Link>
             <p className="text-sm font-medium text-gray-600">Subcategory</p>
             <p className="text-sm font-medium text-gray-600">Items</p>
             <p className="text-sm font-medium text-gray-600">Item details</p>

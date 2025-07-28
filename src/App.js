@@ -6,14 +6,13 @@ import Users from './pages/Users';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
 import ReturnOrders from './pages/ReturnOrders';
-import ManageReviews from './pages/ManageReviews';
 import Analytics from './pages/Analytics';
 import Filters from './pages/Filters';
 import ItemDetails from './pages/ItemDetails';
-import PromoCodeManagement from './pages/PromoCodeManagement';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
+import UploadCategory from './pages/UploadCategory';
 
 function App() {
   return (
@@ -25,14 +24,13 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="orders" element={<Orders />} />
           <Route path="return-orders" element={<ReturnOrders />} />
-          <Route path="manage-reviews" element={<ManageReviews />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="filters" element={<Filters />} />
           <Route path="item-details" element={<ItemDetails />} />
-          <Route path="promo-code-management" element={<PromoCodeManagement />} />
           <Route path="profile" element={<Profile />} />
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="upload-category" element={<UploadCategory />} />
         </Route>
       </Routes>
     </Router>
