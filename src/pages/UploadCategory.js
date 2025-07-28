@@ -11,6 +11,7 @@ const UploadCategory = () => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingCategory, setDeletingCategory] = useState(null);
+  const [isDeleteSuccessModalOpen, setIsDeleteSuccessModalOpen] = useState(false);
 
   // Sample category data - matches the Figma design
   const categories = [
@@ -81,12 +82,19 @@ const UploadCategory = () => {
   const handleConfirmDelete = () => {
     console.log('Deleting category:', deletingCategory.id);
     // Here you would typically remove the category from your state or make an API call
+    
+    // Close delete modal and show delete success modal
     setIsDeleteModalOpen(false);
-    setDeletingCategory(null);
+    setIsDeleteSuccessModalOpen(true);
   };
 
   const handleCancelDelete = () => {
     setIsDeleteModalOpen(false);
+    setDeletingCategory(null);
+  };
+
+  const handleCloseDeleteSuccess = () => {
+    setIsDeleteSuccessModalOpen(false);
     setDeletingCategory(null);
   };
 
@@ -361,6 +369,32 @@ const UploadCategory = () => {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Success Modal */}
+      {isDeleteSuccessModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+            
+            {/* Modal Content */}
+            <div className="p-8 text-center">
+              
+              {/* Delete Success Message */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">category deleted</h2>
+                <h2 className="text-xl font-bold text-gray-900">successfully!</h2>
+              </div>
+
+              {/* Done Button */}
+              <button
+                onClick={handleCloseDeleteSuccess}
+                className="w-full bg-black hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
