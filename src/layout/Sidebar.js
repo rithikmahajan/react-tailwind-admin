@@ -9,7 +9,8 @@ import {
   Settings,
   User,
   Mail,
-  X
+  X,
+  Filter
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -21,6 +22,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Products', icon: Package, path: '/products' },
     { name: 'Orders', icon: ShoppingCart, path: '/orders' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
+    { name: 'Filters', icon: Filter, path: '/filters' },
     { name: 'Profile', icon: User, path: '/profile' },
     { name: 'Messages', icon: Mail, path: '/messages' },
     { name: 'Settings', icon: Settings, path: '/settings' },
@@ -60,6 +62,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <p className="text-sm font-medium text-gray-600">Subcategory</p>
             <p className="text-sm font-medium text-gray-600">Items</p>
             <p className="text-sm font-medium text-gray-600">Item details</p>
+            <p className="text-sm font-medium text-gray-600">Filters</p>
           </div>
         </div>
 
