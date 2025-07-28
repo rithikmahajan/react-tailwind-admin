@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Search, MessageSquare, Bell, User } from 'lucide-react';
+import { Search, MessageSquare, Bell, User, Menu, X } from 'lucide-react';
 
 /**
  * Header Component
@@ -16,7 +16,7 @@ import { Search, MessageSquare, Bell, User } from 'lucide-react';
  * - Optimized icon rendering
  * - Proper accessibility attributes
  */
-const Header = React.memo(({ setSidebarOpen }) => {
+const Header = React.memo(({ setSidebarOpen, onToggleSidebarVisibility, sidebarHidden }) => {
   // Handle search functionality
   const handleSearch = useCallback((e) => {
     e.preventDefault();
@@ -41,12 +41,32 @@ const Header = React.memo(({ setSidebarOpen }) => {
     // TODO: Navigate to profile or show profile dropdown
   }, []);
 
+  // Handle sidebar visibility toggle
+  const handleSidebarVisibilityToggle = useCallback(() => {
+    onToggleSidebarVisibility();
+  }, [onToggleSidebarVisibility]);
+
   return (
     <header className="bg-white h-[60px] w-full max-w-[1920px] relative shadow-sm">
       <div className="flex items-center justify-between h-full px-16">
         
-        {/* Left side - Brand Logo */}
-        <div className="flex items-center">
+        {/* Left side - Brand Logo and Sidebar Toggle */}
+        <div className="flex items-center space-x-4">
+          {/* Sidebar Toggle Button */}
+          <button
+            onClick={handleSidebarVisibilityToggle}
+            className="w-[40px] h-[40px] bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+            title={sidebarHidden ? "Show sidebar" : "Hide sidebar"}
+          >
+            {sidebarHidden ? (
+              <Menu className="w-5 h-5 text-gray-600" />
+            ) : (
+              <X className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+          
+          {/* Brand Logo */}
           <div className="text-2xl font-bold text-black tracking-wide">
             YORAA
           </div>

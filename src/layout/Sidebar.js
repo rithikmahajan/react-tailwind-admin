@@ -129,7 +129,7 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 overflow-y-auto ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      } pt-[60px]`}>
         
         {/* Sidebar Content */}
         <div className="p-6 space-y-6">
