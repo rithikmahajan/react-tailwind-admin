@@ -63,6 +63,7 @@ const Sidebar = React.memo(({ sidebarOpen, setSidebarOpen }) => {
         { name: 'Invite a friend', path: '/invite' },
         { name: 'new admin', path: '/new-admin' },
         { name: 'new partner', path: '/new-partner' },
+        { name: 'block user', path: '/block-user' },
         { name: 'Arrangement control', path: '/arrangement' },
         { name: 'product bundling', path: '/bundling' }
       ]
