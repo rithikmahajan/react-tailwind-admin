@@ -13,7 +13,8 @@ import {
   Filter,
   FileText,
   RotateCcw,
-  Star
+  Star,
+  Percent
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -26,6 +27,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Orders', icon: ShoppingCart, path: '/orders' },
     { name: 'Return Orders', icon: RotateCcw, path: '/return-orders' },
     { name: 'Manage Reviews', icon: Star, path: '/manage-reviews' },
+    { name: 'Promo Code Management', icon: Percent, path: '/promo-code-management' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
     { name: 'Filters', icon: Filter, path: '/filters' },
     { name: 'Item Details', icon: FileText, path: '/item-details' },
