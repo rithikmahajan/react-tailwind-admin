@@ -71,7 +71,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             >
               Category
             </Link>
-            <p className="text-sm font-medium text-gray-600">Subcategory</p>
+            <Link 
+              to="/subcategory" 
+              className={`block text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors duration-200 ${
+                location.pathname === '/subcategory' ? 'text-blue-600 font-semibold' : ''
+              }`}
+            >
+              Subcategory
+            </Link>
             <p className="text-sm font-medium text-gray-600">Items</p>
             <p className="text-sm font-medium text-gray-600">Item details</p>
             <p className="text-sm font-medium text-gray-600">Filters</p>

@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import UploadCategory from './pages/UploadCategory';
+import SubCategory from './pages/SubCategory';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
           <Route path="upload-category" element={<UploadCategory />} />
+          <Route path="subcategory" element={<SubCategory />} />
         </Route>
       </Routes>
     </Router>
