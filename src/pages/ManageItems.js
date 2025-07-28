@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Search, Edit2, Trash2, ChevronDown, Upload, Plus } from 'lucide-react';
+import { Search, Edit2, Trash2, ChevronDown, Upload, Plus, X } from 'lucide-react';
 
 const ManageItems = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All categories');
   const [selectedSubCategory, setSelectedSubCategory] = useState('All subcategories');
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [newDetails, setNewDetails] = useState('');
 
   // Sample items data - matches the Figma design
   const items = [
@@ -76,7 +79,24 @@ const ManageItems = () => {
   };
 
   const handleEdit = (itemId) => {
-    console.log('Edit item:', itemId);
+    const itemToEdit = items.find(item => item.id === itemId);
+    setEditingItem(itemToEdit);
+    setNewDetails('');
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    console.log('Saving edit for item:', editingItem.id, 'New details:', newDetails);
+    // Here you would typically update the item in your state or make an API call
+    setIsEditModalOpen(false);
+    setEditingItem(null);
+    setNewDetails('');
+  };
+
+  const handleCloseEdit = () => {
+    setIsEditModalOpen(false);
+    setEditingItem(null);
+    setNewDetails('');
   };
 
   const handleDelete = (itemId) => {
@@ -199,7 +219,7 @@ const ManageItems = () => {
           <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
             {/* Table Header */}
             <div className="bg-gray-50 border-b border-gray-200">
-              <div className="grid grid-cols-12 gap-4 p-4 text-xs font-bold text-gray-700">
+              <div className="grid grid-cols-12 gap-2 p-4 text-xs font-bold text-gray-700">
                 <div className="col-span-1 flex items-center">
                   <input
                     type="checkbox"
@@ -217,15 +237,15 @@ const ManageItems = () => {
                 <div className="col-span-1">Price</div>
                 <div className="col-span-1">sale price</div>
                 <div className="col-span-1">SKU</div>
-                <div className="col-span-1">barcode no.</div>
                 <div className="col-span-1">status</div>
+                <div className="col-span-1">Action</div>
               </div>
             </div>
 
             {/* Table Rows */}
             <div className="divide-y divide-gray-100">
               {filteredItems.map((item) => (
-                <div key={item.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-gray-50 transition-colors text-sm">
+                <div key={item.id} className="grid grid-cols-12 gap-2 p-4 items-center hover:bg-gray-50 transition-colors text-sm">
                   
                   {/* Checkbox */}
                   <div className="col-span-1">
@@ -288,16 +308,31 @@ const ManageItems = () => {
                     <p className="text-gray-600 text-xs">{item.sku}</p>
                   </div>
 
-                  {/* Barcode */}
-                  <div className="col-span-1">
-                    <p className="text-gray-600 text-xs">{item.barcodeNo}</p>
-                  </div>
-
                   {/* Status */}
                   <div className="col-span-1">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusStyle(item.status)}`}>
                       {item.status}
                     </span>
+                  </div>
+
+                  {/* Action */}
+                  <div className="col-span-1">
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => handleEdit(item.id)}
+                        className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -345,6 +380,106 @@ const ManageItems = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Item Modal */}
+      {isEditModalOpen && editingItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden max-h-screen overflow-y-auto">
+            
+            {/* Modal Header */}
+            <div className="relative p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Edit now</h2>
+              <button
+                onClick={handleCloseEdit}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              
+              {/* Current Item Details Table */}
+              <div className="mb-6 overflow-x-auto">
+                <table className="w-full border border-gray-300 rounded-lg">
+                  <thead className="bg-gray-50">
+                    <tr className="text-xs font-bold text-gray-700">
+                      <th className="p-3 text-left border-r border-gray-300">Image</th>
+                      <th className="p-3 text-left border-r border-gray-300">Product Name</th>
+                      <th className="p-3 text-left border-r border-gray-300">Category</th>
+                      <th className="p-3 text-left border-r border-gray-300">sub categories</th>
+                      <th className="p-3 text-left border-r border-gray-300">size</th>
+                      <th className="p-3 text-left border-r border-gray-300">quantity</th>
+                      <th className="p-3 text-left border-r border-gray-300">Price</th>
+                      <th className="p-3 text-left border-r border-gray-300">sale price</th>
+                      <th className="p-3 text-left border-r border-gray-300">SKU</th>
+                      <th className="p-3 text-left border-r border-gray-300">barcode no.</th>
+                      <th className="p-3 text-left border-r border-gray-300">status</th>
+                      <th className="p-3 text-left">meta data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="text-sm">
+                      <td className="p-3 border-r border-gray-200">
+                        <img
+                          src={editingItem.image}
+                          alt={editingItem.productName}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      </td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.productName}</td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.category}</td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.subCategories}</td>
+                      <td className="p-3 border-r border-gray-200">{getSizeDisplay(editingItem.size)}</td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.quantity}</td>
+                      <td className="p-3 border-r border-gray-200">₹{editingItem.price}</td>
+                      <td className="p-3 border-r border-gray-200">₹{editingItem.salePrice}</td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.sku}</td>
+                      <td className="p-3 border-r border-gray-200">{editingItem.barcodeNo}</td>
+                      <td className="p-3 border-r border-gray-200">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusStyle(editingItem.status)}`}>
+                          {editingItem.status}
+                        </span>
+                      </td>
+                      <td className="p-3">{editingItem.metaData}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Edit Section */}
+              <div className="mb-6">
+                <label className="block text-lg font-bold text-gray-900 mb-4">
+                  Type new details
+                </label>
+                <textarea
+                  value={newDetails}
+                  onChange={(e) => setNewDetails(e.target.value)}
+                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  placeholder="Enter new details..."
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={handleSaveEdit}
+                  className="bg-black hover:bg-gray-800 text-white font-medium py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  save
+                </button>
+                <button
+                  onClick={handleCloseEdit}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-8 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+                >
+                  go back
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
