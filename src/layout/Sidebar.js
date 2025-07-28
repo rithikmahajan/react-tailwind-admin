@@ -52,6 +52,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </button>
         </div>
 
+        {/* App uploading area */}
+        <div className="p-4 border-b bg-gray-50">
+          <h3 className="text-lg font-bold text-gray-800 mb-3">App uploading area</h3>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-600">Category</p>
+            <p className="text-sm font-medium text-gray-600">Subcategory</p>
+            <p className="text-sm font-medium text-gray-600">Items</p>
+            <p className="text-sm font-medium text-gray-600">Item details</p>
+          </div>
+        </div>
+
         {/* Navigation */}
         <nav className="mt-6">
           {menuItems.map((item) => {
